@@ -27,6 +27,7 @@ function ContentGANModel:Initialize(opt)
   end
   -- define tensors
   self.real_A = torch.Tensor(opt.batchSize, opt.input_nc, opt.fineSize, opt.fineSize)
+  self.real_GT = torch.Tensor(opt.batchSize, opt.input_nc, opt.fineSize, opt.fineSize)
   self.fake_B = torch.Tensor(opt.batchSize, opt.output_nc, opt.fineSize, opt.fineSize)
   self.real_B = self.fake_B:clone() --torch.Tensor(opt.batchSize, opt.output_nc, opt.fineSize, opt.fineSize)
 
@@ -73,6 +74,7 @@ function ContentGANModel:Forward(input, opt)
   end
 
   self.real_A:copy(input.real_A)
+  self.real_GT:copy(input.real_GT)
   self.real_B:copy(input.real_B)
   self.fake_B = self.netG:forward(self.real_A):clone()
   -- output = {self.fake_B}
@@ -133,7 +135,7 @@ function ContentGANModel:fGx_basic(x, netG_source, netD_source, real_source, rea
   -- content loss
   -- print('content_loss', opt.content_loss)
   -- function content.lossUpdate(criterionContent, real_source, fake_target, contentFunc, loss_type, weight)
-  local errContent, df_d_content = content.lossUpdate(self.criterionContent, real_source, fake_target, self.contentFunc, opt.content_loss, opt.lambda_A)
+  local errContent, df_d_content = content.lossUpdate(self.criterionContent, real_source, fake_target, self.contentFunc, opt.content_loss, opt.lambda_A, mask)
   netG_source:forward(real_source)
   netG_source:backward(real_source, df_d_GAN  + df_d_content)
   -- print('errD', errGAN)

@@ -22,7 +22,7 @@ local opt_train = {
    display_id = 10,        -- display window id.
    display_winsize = 128,  -- display window size
    display_freq = 25,      -- display the current results every display_freq iterations
-   gpu = 1,                -- gpu = 0 is CPU mode. gpu=X is GPU mode on GPU X
+   gpu = 0,                -- gpu = 0 is CPU mode. gpu=X is GPU mode on GPU X
    name = '',              -- name of the experiment, should generally be passed on the command line
    which_direction = 'AtoB',    -- AtoB or BtoA
    phase = 'train',             -- train, val, test, etc

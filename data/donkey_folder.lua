@@ -87,6 +87,56 @@ local function loadImage(path)
   return concatenated
 end
 
+local function loadImageWithGT(path)
+  local gt_filename = paths.concat(paths.dirname(paths.dirname(path)), "trainGT", paths.basename(path))
+  local input = image.load(path, 3, 'float')
+  local gt = image.load(gt_filename, 3, 'float')
+
+  local h = input:size(2)
+  local w = input:size(3)
+
+  local imA = image.scale(input, loadSize[2], loadSize[2])
+  local imB = image.scale(gt, loadSize[2], loadSize[2])
+
+  local perm = torch.LongTensor{3, 2, 1}
+  imA = imA:index(1, perm)
+  imA = imA:mul(2):add(-1)
+  imB = imB:index(1, perm)
+  imB = imB:mul(2):add(-1)
+
+  assert(imA:max()<=1,"A: badly scaled inputs")
+  assert(imA:min()>=-1,"A: badly scaled inputs")
+  assert(imB:max()<=1,"B: badly scaled inputs")
+  assert(imB:min()>=-1,"B: badly scaled inputs")
+
+
+  local oW = sampleSize[2]
+  local oH = sampleSize[2]
+  local iH = imA:size(2)
+  local iW = imA:size(3)
+
+  if iH~=oH then
+    h1 = math.ceil(torch.uniform(1e-2, iH-oH))
+  end
+
+  if iW~=oW then
+    w1 = math.ceil(torch.uniform(1e-2, iW-oW))
+  end
+  if iH ~= oH or iW ~= oW then
+    imA = image.crop(imA, w1, h1, w1 + oW, h1 + oH)
+    imB = image.crop(imB, w1, h1, w1 + oW, h1 + oH)
+  end
+
+  if opt.flip == 1 and torch.uniform() > 0.5 then
+    imA = image.hflip(imA)
+    imB = image.hflip(imB)
+  end
+
+  local concatenated = torch.cat(imA,imB,1)
+
+  return concatenated
+end
+
 
 local function loadSingleImage(path)
     local im = image.load(path, input_nc, 'float')
@@ -170,10 +220,20 @@ local trainHook_doubleimage = function(self, path)
   return im
 end
 
+local trainHook_image_with_gt = function(self, path)
+  -- print('load double image')
+  collectgarbage()
 
-if opt.align_data > 0 then
-  sample_nc = input_nc*2
+  local im = loadImageWithGT(path)
+  return im
+end
+
+if opt.align_data > 1 then
+  sample_nc = input_nc
   trainHook = trainHook_doubleimage
+elseif opt.align_data == 1 then
+  sample_nc = input_nc*2
+  trainHook = trainHook_image_with_gt
 else
   sample_nc = input_nc
   trainHook = trainHook_singleimage
