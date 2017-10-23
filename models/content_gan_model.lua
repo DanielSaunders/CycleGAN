@@ -117,7 +117,7 @@ function ContentGANModel:fDx(x, opt)
   return self.errD, gradParams
 end
 
-function ContentGANModel:fGx_basic(x, netG_source, netD_source, real_source, real_target, fake_target,
+function ContentGANModel:fGx_basic(x, netG_source, netD_source, real_source, real_gt, real_target, fake_target,
                                    gradParametersG_source, opt)
   util.BiasZero(netD_source)
   util.BiasZero(netG_source)
@@ -135,7 +135,7 @@ function ContentGANModel:fGx_basic(x, netG_source, netD_source, real_source, rea
   -- content loss
   -- print('content_loss', opt.content_loss)
   -- function content.lossUpdate(criterionContent, real_source, fake_target, contentFunc, loss_type, weight)
-  local errContent, df_d_content = content.lossUpdate(self.criterionContent, real_source, fake_target, self.contentFunc, opt.content_loss, opt.lambda_A, mask)
+  local errContent, df_d_content = content.lossUpdate(self.criterionContent, real_source, real_gt, fake_target, self.contentFunc, opt.content_loss, opt.lambda_A)
   netG_source:forward(real_source)
   netG_source:backward(real_source, df_d_GAN  + df_d_content)
   -- print('errD', errGAN)
@@ -145,7 +145,7 @@ end
 function ContentGANModel:fGx(x, opt)
   self.gradparametersG, self.errG, self.errCont =
   self:fGx_basic(x, self.netG, self.netD,
-             self.real_A, self.real_B, self.fake_B,
+             self.real_A, self.real_GT, self.real_B, self.fake_B,
              self.gradparametersG, opt)
   return self.errG, self.gradparametersG
 end

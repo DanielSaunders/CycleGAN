@@ -90,7 +90,7 @@ end
 local function loadImageWithGT(path)
   local gt_filename = paths.concat(paths.dirname(paths.dirname(path)), "trainGT", paths.basename(path))
   local input = image.load(path, 3, 'float')
-  local gt = image.load(gt_filename, 3, 'float')
+  local gt = image.load(gt_filename, 3, 'float') * 255
 
   local h = input:size(2)
   local w = input:size(3)
@@ -229,7 +229,7 @@ local trainHook_image_with_gt = function(self, path)
 end
 
 if opt.align_data > 1 then
-  sample_nc = input_nc
+  sample_nc = input_nc*2
   trainHook = trainHook_doubleimage
 elseif opt.align_data == 1 then
   sample_nc = input_nc*2

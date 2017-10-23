@@ -63,18 +63,19 @@ function content.defineContent(content_loss, layer_name)
 end
 
 
-function content.lossUpdate(criterionContent, real_source, fake_target, contentFunc, loss_type, weight)
+function content.lossUpdate(criterionContent, real_source, real_gt, fake_target, contentFunc, loss_type, weight)
   if loss_type == 'none' then
     local errCont = 0.0
     local df_d_content = torch.zeros(fake_target:size())
     return errCont, df_d_content
   elseif loss_type == 'pixel' then
     local errCont = criterionContent:forward(fake_target, real_source) * weight
-    local df_do_content = criterionContent:backward(fake_target, real_source)*weight
+    local df_do_content = torch.cmul(criterionContent:backward(fake_target, real_source), real_gt)
+    --local df_do_content = criterionContent:backward(fake_target, real_source) * weight
     return errCont, df_do_content
   elseif loss_type == 'vgg' then
     local f_fake = contentFunc:forward(fake_target):clone()
-	  local f_real = contentFunc:forward(real_source):clone()
+    local f_real = contentFunc:forward(real_source):clone()
     local errCont = criterionContent:forward(f_fake, f_real) * weight
     local df_do_tmp = criterionContent:backward(f_fake, f_real) * weight
     local df_do_content = contentFunc:updateGradInput(fake_target, df_do_tmp)--:mul(weight)
