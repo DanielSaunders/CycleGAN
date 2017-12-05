@@ -102,7 +102,8 @@ local function loadImageWithGT(path)
   imA = imA:index(1, perm)
   imA = imA:mul(2):add(-1)
   imB = imB:index(1, perm)
-  imB = imB:mul(2):add(-1)
+  imB = 1 - imB
+  -- imB = imB:mul(2):add(-1)
 
   assert(imA:max()<=1,"A: badly scaled inputs")
   assert(imA:min()>=-1,"A: badly scaled inputs")

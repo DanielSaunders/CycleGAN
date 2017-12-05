@@ -70,8 +70,8 @@ function content.lossUpdate(criterionContent, real_source, real_gt, fake_target,
     return errCont, df_d_content
   elseif loss_type == 'pixel' then
     local errCont = criterionContent:forward(fake_target, real_source) * weight
-    local df_do_content = torch.cmul(criterionContent:backward(fake_target, real_source), real_gt)
-    --local df_do_content = criterionContent:backward(fake_target, real_source) * weight
+    -- local df_do_content = criterionContent:backward(fake_target, real_source) * weight
+    local df_do_content = torch.cmul(criterionContent:backward(fake_target, real_source), real_gt) * weight
     return errCont, df_do_content
   elseif loss_type == 'vgg' then
     local f_fake = contentFunc:forward(fake_target):clone()

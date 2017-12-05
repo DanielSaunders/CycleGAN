@@ -73,10 +73,17 @@ function ContentGANModel:Forward(input, opt)
     input.real_B = temp
   end
 
+  self.as_autoencoder = input.as_autoencoder
+
   self.real_A:copy(input.real_A)
   self.real_GT:copy(input.real_GT)
   self.real_B:copy(input.real_B)
-  self.fake_B = self.netG:forward(self.real_A):clone()
+
+  if self.as_autoencoder == true then
+    self.fake_B = self.netG:forward(self.real_B):clone()
+  else
+    self.fake_B = self.netG:forward(self.real_A):clone()
+  end
   -- output = {self.fake_B}
   output =  {}
   -- if opt.test == 1 then
@@ -150,11 +157,36 @@ function ContentGANModel:fGx(x, opt)
   return self.errG, self.gradparametersG
 end
 
+function ContentGANModel:autoencoder_basic(x, netG_source, real_source, fake_target, gradParametersG_source, opt)
+  util.BiasZero(netG_source)
+  gradParametersG_source:zero()
+
+  local errGAN = self.criterionGAN:forward(fake_target, real_source) * opt.lambda_A
+  local df_do_content = self.criterionGAN:backward(fake_target, real_source) * opt.lambda_A
+
+  netG_source:forward(real_source)
+  netG_source:backward(real_source, df_do_content)
+
+  return gradParametersG_source, errGAN
+end
+
+function ContentGANModel:autoencoder(x, opt)
+  self.gradparametersG, self.errG =
+  self:autoencoder_basic(x, self.netG, self.real_B, self.fake_B,
+             self.gradparametersG, opt)
+  return self.errG, self.gradparametersG
+end
+
 function ContentGANModel:OptimizeParameters(opt)
-  local fDx = function(x) return self:fDx(x, opt) end
-  local fGx = function(x) return self:fGx(x, opt) end
-  optim.adam(fDx, self.parametersD, self.optimStateD)
-  optim.adam(fGx, self.parametersG, self.optimStateG)
+  if self.as_autoencoder then
+    local fGx = function(x) return self:autoencoder(x, opt) end
+    optim.adam(fGx, self.parametersG, self.optimStateG)
+  else
+    local fDx = function(x) return self:fDx(x, opt) end
+    local fGx = function(x) return self:fGx(x, opt) end
+    optim.adam(fDx, self.parametersD, self.optimStateD)
+    optim.adam(fGx, self.parametersG, self.optimStateG)
+  end
 end
 
 function ContentGANModel:RefreshParameters()
