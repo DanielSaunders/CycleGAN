@@ -88,15 +88,23 @@ local function loadImage(path)
 end
 
 local function loadImageWithGT(path)
-  local gt_filename = paths.concat(paths.dirname(paths.dirname(path)), "trainGT", paths.basename(path))
+  local gt_filename = ""
+  local gt = nil
+  local imB = nil
   local input = image.load(path, 3, 'float')
-  local gt = image.load(gt_filename, 3, 'float') * 255
+
+  if string.match(path, "train") then
+    gt_filename = paths.concat(paths.dirname(paths.dirname(path)), "trainGT", paths.basename(path))
+    gt = image.load(gt_filename, 3, 'float') * 255
+    imB = image.scale(gt, loadSize[2], loadSize[2])
+  else
+    imB = input:clone()
+  end
 
   local h = input:size(2)
   local w = input:size(3)
 
   local imA = image.scale(input, loadSize[2], loadSize[2])
-  local imB = image.scale(gt, loadSize[2], loadSize[2])
 
   local perm = torch.LongTensor{3, 2, 1}
   imA = imA:index(1, perm)
