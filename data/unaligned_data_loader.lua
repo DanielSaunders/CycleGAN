@@ -34,7 +34,7 @@ end
 -- |return|: a table of two tables, each corresponding to
 -- the batch for dataset A and dataset B
 function UnalignedDataLoader:LoadBatchForAllDatasets()
-  local batch_data, path = self.data:getBatch()
+  local batch_data, pathA = self.data:getBatch()
   local batchA = batch_data[{ {}, self.idx_A, {}, {} }]
   local batchGT = batch_data[{ {}, self.idx_GT, {}, {} }]
 

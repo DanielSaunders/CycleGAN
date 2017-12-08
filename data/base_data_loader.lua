@@ -33,9 +33,9 @@ end
 function BaseDataLoader:GetNextBatch()
   self.data_tm:reset()
   self.data_tm:resume()
-  local dataA, dataB, pathA, pathB = self:LoadBatchForAllDatasets()
+  local dataA, dataB, dataGT, pathA, pathB = self:LoadBatchForAllDatasets()
   self.data_tm:stop()
-  return dataA, dataB, pathA, pathB
+  return dataA, dataB, dataGT, pathA, pathB
 end
 
 function BaseDataLoader:time_elapsed_to_fetch_data()

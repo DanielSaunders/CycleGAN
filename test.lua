@@ -91,13 +91,11 @@ visuals = {}
 
 for n = 1, math.floor(opt.how_many) do
   print('processing batch ' .. n)
-  local cur_dataA, cur_dataB, cur_pathsA, cur_pathsB = data_loader:GetNextBatch()
+  local cur_dataA, cur_dataB, cur_dataGT, cur_pathsA, cur_pathsB = data_loader:GetNextBatch()
 
   cur_pathsA = util.basename_batch(cur_pathsA)
   cur_pathsB = util.basename_batch(cur_pathsB)
-  print('pathsA', cur_pathsA)
-  print('pathsB', cur_PathsB)
-  model:Forward({real_A=cur_dataA, real_B=cur_dataB}, opt)
+  model:Forward({real_A=cur_dataA, real_B=cur_dataB, real_GT=cur_dataGT}, opt)
 
   visuals = model:GetCurrentVisuals(opt, opt.fineSize)
 
