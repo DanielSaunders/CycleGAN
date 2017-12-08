@@ -128,10 +128,12 @@ for epoch = 1, opt.niter+opt.niter_decay do
     for counter_in_epoch = 1, math.min(data_loader:size(), opt.ntrain), opt.batchSize do
         tm:reset()
         -- load a batch and run G on that batch
-        if torch.random % 100 >= 0 then
-          local train_as_autoencoder = true
+        local train_as_autoencoder = nil
+
+        if math.random() >= 0.8 then
+          train_as_autoencoder = true
         else
-          local train_as_autoencoder = false
+          train_as_autoencoder = false
         end
 
         local real_dataA, real_dataB, real_dataGT, _, _ = data_loader:GetNextBatch()
@@ -170,7 +172,7 @@ for epoch = 1, opt.niter+opt.niter_decay do
         print(('saving the model (epoch %d, iters %d)'):format(epoch, counter))
         model:Save('latest', opt)
         model:Save(epoch, opt)
-   end
+    end
     -- print the timing information after each epoch
     print(('End of epoch %d / %d \t Time Taken: %.3f'):
         format(epoch, opt.niter+opt.niter_decay, epoch_tm:time().real))
