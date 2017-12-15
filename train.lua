@@ -130,7 +130,7 @@ for epoch = 1, opt.niter+opt.niter_decay do
         -- load a batch and run G on that batch
         local train_as_autoencoder = nil
 
-        if math.random() >= 0.8 then
+        if math.random() < opt.autoencoder_freq then
           train_as_autoencoder = true
         else
           train_as_autoencoder = false

@@ -161,6 +161,7 @@ function ContentGANModel:autoencoder_basic(x, netG_source, real_source, fake_tar
   util.BiasZero(netG_source)
   gradParametersG_source:zero()
 
+  -- criterionGAN is an L1 loss. criterionContent is an L2 loss which could be used instead
   local errGAN = self.criterionGAN:forward(fake_target, real_source) * opt.lambda_A
   local df_do_content = self.criterionGAN:backward(fake_target, real_source) * opt.lambda_A
 

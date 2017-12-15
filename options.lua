@@ -51,6 +51,7 @@ local opt_train = {
    resize_or_crop = 'resize_and_crop',  -- resizing/cropping strategy: resize_and_crop | crop | scale_width | scale_height
    identity = 0,                  -- use identity mapping. Setting opt.identity other than 1 has an effect of scaling the weight of the identity mapping loss. For example, if the weight of the identity loss should be 10 times smaller than the weight of the reconstruction loss, please set opt.identity = 0.1
    use_optnet = 0,                -- use optnet to save GPU memory during test
+   autoencoder_freq = 0.2         -- how often an autoencoder phase should be run where 0 is never and 1 is always
 }
 
 -- options for test
